@@ -1,5 +1,9 @@
 #include "ofParameter.h"
 #include "ofParameterGroup.h"
+#if OF_USE_POCO
+#include "ofXml.h"
+#endif
+#include "ofJson.h"
 using namespace std;
 
 string ofAbstractParameter::getEscapedName() const{
@@ -57,6 +61,46 @@ istream& operator>>(istream& is, ofAbstractParameter& p){
 	is >> str;
 	p.fromString(str);
 	return is;
+}
+
+void ofAbstractParameter::saveToFile(const std::string& filename){
+	auto extension = ofToLower(ofFilePath::getFileExt(filename));
+#if OF_USE_POCO
+	if(extension == "xml"){
+		ofXml xml;
+		if(ofFile(filename, ofFile::Reference).exists()){
+			xml.load(filename);
+		}
+		saveTo(xml);
+		xml.save(filename);
+	}else
+#endif
+		if(extension == "json"){
+			ofJson json = ofLoadJson(filename);
+			saveTo(json);
+			ofSavePrettyJson(filename, json);
+		}else{
+			ofLogError("ofxGui") << extension << " not recognized, only .xml and .json supported by now";
+		}
+}
+
+void ofAbstractParameter::loadFromFile(const std::string& filename){
+	auto extension = ofToLower(ofFilePath::getFileExt(filename));
+#if OF_USE_POCO
+	if(extension == "xml"){
+		ofXml xml;
+		xml.load(filename);
+		loadFrom(xml);
+	}else
+#endif
+		if(extension == "json"){
+			ofJson json;
+			ofFile jsonFile(filename);
+			jsonFile >> json;
+			loadFrom(json);
+		}else{
+			ofLogError("ofxGui") << extension << " not recognized, only .xml and .json supported by now";
+		}
 }
 
 

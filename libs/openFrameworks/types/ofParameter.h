@@ -55,6 +55,20 @@ public:
 	virtual shared_ptr<ofAbstractParameter> newReference() const = 0;
 
 	virtual bool isReferenceTo(const ofAbstractParameter& other) const;
+	
+	void saveToFile(const std::string& filename);
+	void loadFromFile(const std::string& filename);
+	
+	template<class T>
+	void saveTo(T & serializer){
+		ofSerialize(serializer, *this);
+	}
+	
+	template<class T>
+	void loadFrom(T & serializer){
+		ofDeserialize(serializer, *this);
+	}
+
 
 protected:
 	virtual const ofParameterGroup getFirstParent() const = 0;

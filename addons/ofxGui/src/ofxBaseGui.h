@@ -16,15 +16,15 @@ class ofxBaseGui {
 		void saveToFile(const std::string& filename);
 		void loadFromFile(const std::string& filename);
 
-		template<class T>
-		void saveTo(T & serializer){
-			ofSerialize(serializer, getParameter());
-		}
-
-		template<class T>
-		void loadFrom(T & serializer){
-			ofDeserialize(serializer, getParameter());
-		}
+//		template<class T>
+//		void saveTo(T & serializer){
+//			ofSerialize(serializer, getParameter());
+//		}
+//
+//		template<class T>
+//		void loadFrom(T & serializer){
+//			ofDeserialize(serializer, getParameter());
+//		}
 
 		std::string getName();
 		void setName(const std::string& name);

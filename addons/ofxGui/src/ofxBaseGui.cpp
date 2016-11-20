@@ -168,43 +168,45 @@ ofRectangle ofxBaseGui::getTextBoundingBox(const string & text, float x, float y
 }
 
 void ofxBaseGui::saveToFile(const std::string& filename){
-	auto extension = ofToLower(ofFilePath::getFileExt(filename));
-#if OF_USE_POCO
-	if(extension == "xml"){
-		ofXml xml;
-		if(ofFile(filename, ofFile::Reference).exists()){
-			xml.load(filename);
-		}
-		saveTo(xml);
-		xml.save(filename);
-    }else
-#endif
-    if(extension == "json"){
-        ofJson json = ofLoadJson(filename);
-		saveTo(json);
-        ofSavePrettyJson(filename, json);
-	}else{
-		ofLogError("ofxGui") << extension << " not recognized, only .xml and .json supported by now";
-	}
+	getParameter().saveToFile(filename);
+//	auto extension = ofToLower(ofFilePath::getFileExt(filename));
+//#if OF_USE_POCO
+//	if(extension == "xml"){
+//		ofXml xml;
+//		if(ofFile(filename, ofFile::Reference).exists()){
+//			xml.load(filename);
+//		}
+//		saveTo(xml);
+//		xml.save(filename);
+//    }else
+//#endif
+//    if(extension == "json"){
+//        ofJson json = ofLoadJson(filename);
+//		saveTo(json);
+//        ofSavePrettyJson(filename, json);
+//	}else{
+//		ofLogError("ofxGui") << extension << " not recognized, only .xml and .json supported by now";
+//	}
 }
 
 void ofxBaseGui::loadFromFile(const std::string& filename){
-	auto extension = ofToLower(ofFilePath::getFileExt(filename));
-#if OF_USE_POCO
-	if(extension == "xml"){
-		ofXml xml;
-		xml.load(filename);
-		loadFrom(xml);
-    }else
-#endif
-    if(extension == "json"){
-		ofJson json;
-		ofFile jsonFile(filename);
-		jsonFile >> json;
-		loadFrom(json);
-	}else{
-		ofLogError("ofxGui") << extension << " not recognized, only .xml and .json supported by now";
-	}
+	getParameter().loadFromFile(filename);
+//	auto extension = ofToLower(ofFilePath::getFileExt(filename));
+//#if OF_USE_POCO
+//	if(extension == "xml"){
+//		ofXml xml;
+//		xml.load(filename);
+//		loadFrom(xml);
+//    }else
+//#endif
+//    if(extension == "json"){
+//		ofJson json;
+//		ofFile jsonFile(filename);
+//		jsonFile >> json;
+//		loadFrom(json);
+//	}else{
+//		ofLogError("ofxGui") << extension << " not recognized, only .xml and .json supported by now";
+//	}
 }
 
 string ofxBaseGui::getName(){
