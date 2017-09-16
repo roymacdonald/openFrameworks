@@ -1,5 +1,5 @@
 #pragma once
-
+#include "ofImage.h"
 #include "ofCamera.h"
 #include "ofEvents.h"
 
@@ -174,6 +174,7 @@ public:
 	bool hasInteraction(TransformType type, int mouseButton, int key = -1);
 	bool hasInteraction(int mouseButton, int key);
 	void removeAllInteractions();
+	ofShortImage sampleNeighbourhood;
 private:
 	void setDistance(float distance, bool save);
 
@@ -272,4 +273,6 @@ private:
 		TransformType transformType;
 	};
 	vector<interaction> interactions;
+	void findCursor();
+	float projectedDepth;
 };

@@ -354,6 +354,7 @@ ofRectangle ofEasyCam::getControlArea() const {
 void ofEasyCam::mousePressed(ofMouseEventArgs & mouse){
 	ofRectangle area = getControlArea();
 	if(area.inside(mouse.x, mouse.y)){
+		findCursor();
 		lastPressMouse = mouse;
 		prevMouse = mouse;
 		lastPressAxisX = getXAxis();
@@ -497,3 +498,58 @@ bool ofEasyCam:: hasInteraction(TransformType type, int mouseButton, int key){
 void ofEasyCam::removeAllInteractions(){
 	interactions.clear();
 }
+
+void ofEasyCam::findCursor() {
+	auto area = getControlArea();
+	ofVec2f mouse (ofGetMouseX(), ofGetMouseY());
+	if(area.inside(mouse)){
+		GLint mouseViewportX = mouse.x - area.x;
+		GLint mouseViewportY = mouse.y - area.y;
+		mouseViewportY = area.height - 1 - mouseViewportY;
+		//	this->view.viewport.height - 1 - this->tracking.mouse.viewport.position.y;
+		
+		const auto nearPlaneZ = (unsigned short) 32768;
+		const auto farPlaneZ = (unsigned short) 65535;
+		
+		unsigned short z = farPlaneZ;
+		
+		//sampleRect will be in OpenGL's viewport coordinates
+		int searchWidth = 5;
+		auto sampleRect = ofRectangle(-searchWidth / 2, -searchWidth / 2, searchWidth, searchWidth);
+		sampleRect.x += mouseViewportX;
+		sampleRect.y += mouseViewportY;
+		auto vp = getViewport(this->viewport);
+		auto cropRect = ofRectangle(0, 0, vp.width, vp.height);
+		sampleRect = sampleRect.getIntersection(cropRect);
+		
+		//this should always be true since findCursor is only called whilst cursor is inside viewport
+		if (sampleRect.width > 0 && sampleRect.height > 0) {
+			//check if we need to reallocate our local buffer for depth pixels
+			if (this->sampleNeighbourhood.getWidth() != sampleRect.getWidth() || this->sampleNeighbourhood.getHeight() != sampleRect.getHeight()) {
+				this->sampleNeighbourhood.allocate(sampleRect.getWidth(), sampleRect.getHeight(), OF_IMAGE_GRAYSCALE);
+			}
+			
+			//sample depth pixels in the neighbourhood of the mouse
+			glReadPixels(sampleRect.x, sampleRect.y, sampleRect.width, sampleRect.height, GL_DEPTH_COMPONENT, GL_UNSIGNED_SHORT, this->sampleNeighbourhood.getPixels().getData());
+			
+			//pick the closest pixel to use as a sample
+			auto px = this->sampleNeighbourhood.getPixels().getData();
+			for (int i = 0; i < this->sampleNeighbourhood.getPixels().size(); i++ ) {
+				//check that it's valid before using it
+				if (px[i] >= nearPlaneZ && px[i] <= farPlaneZ) {
+					z = std::min(px[i], z);
+				}
+			}
+		}
+		//check we're still looking at the near/far plane before updating the mouse distance
+		if (z != nearPlaneZ && z != farPlaneZ) {
+			this->projectedDepth = ((float)z / (float)USHRT_MAX) * 2.0f - 1.0f;
+		}
+		
+		//find mouse coordinates
+		auto mouseProjected = glm::vec3(mouse.x - vp.x,mouse.y - vp.y,this->projectedDepth);
+		this->target.setPosition(this->screenToWorld(mouseProjected));
+	}
+}
+
+
