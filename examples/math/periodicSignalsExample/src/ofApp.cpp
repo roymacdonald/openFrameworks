@@ -67,7 +67,7 @@ void ofApp::update(){
 		if(x<prevX){
 			trail[i].clear();
 		}else{
-			trail[i].addVertex(ofPoint(x,y[i]));
+			trail[i].addVertex(glm::vec3(x,y[i],0));
 		}
 	}
 
