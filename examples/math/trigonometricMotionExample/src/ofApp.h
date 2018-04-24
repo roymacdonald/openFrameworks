@@ -96,12 +96,12 @@ class ofApp : public ofBaseApp{
 		vector<oscillator>horizontalOscilators; //In this vector object we're going to save our horizontal oscillators.
 		vector<oscillator>verticalOscilators;   //In this vector object we're going to save our vertical oscillators.
 
-		ofVec3f waveHistory [TAIL_LENGTH]; // This array object is to save the previous positions of the composite wave we're creating, so we can draw it's path later.
+		glm::vec3 waveHistory [TAIL_LENGTH]; // This array object is to save the previous positions of the composite wave we're creating, so we can draw it's path later.
 
 		float horWaveHistory [WAVEFORM_HISTORY];//This and the following array are for saving the wave form history.
 		float vertWaveHistory [WAVEFORM_HISTORY];
 
-		ofPoint center; //This is to store the center location for the composite wave .
+		glm::vec3 center; //This is to store the center location for the composite wave .
 		float scale; // the amount by which the waveforms get scaled.
 		bool bScaleMouse;//just to know that you're using the mouse to change the scale.
 
