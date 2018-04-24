@@ -21,7 +21,7 @@ void ofApp::setup(){
 	tangent=0;
 	rotationSpeed=0.01;
 	radius = 180;
-	center.set(ofGetWidth()*0.3f, ofGetHeight()*0.6f, 0);
+    center = glm::vec3(ofGetWidth()*0.3f, ofGetHeight()*0.6f, 0);
 	
 	ofSetCircleResolution(40);
 	
@@ -35,7 +35,6 @@ void ofApp::setup(){
 
 //--------------------------------------------------------------
 void ofApp::update(){
-	cout << rotationSpeed << endl;
     
     if (!ofGetMousePressed()) {//press the mouse to stop the angle from incrementing.
 		angle+=rotationSpeed;//at each update the angle get's incremented 
@@ -51,7 +50,7 @@ void ofApp::update(){
     
 	
 	
-	point.set(cosine * radius, sine * radius, 0);//here we set the cyan circle position
+    point = glm::vec3(cosine * radius, sine * radius, 0);//here we set the cyan circle position
 	
 	//this is just to draw the arc that represents the angle 
 	angleArc.clear();
