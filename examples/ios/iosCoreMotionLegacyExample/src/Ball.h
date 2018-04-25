@@ -8,16 +8,16 @@
 class Ball{
 
     public:
-        ofPoint pos;
-        ofPoint vel;
+        glm::vec3 pos;
+        glm::vec3 vel;
         ofColor col;
         ofColor touchCol;
         bool bDragged;
 	
         //----------------------------------------------------------------	
         void init(int id) {
-            pos.set(ofRandomWidth(), ofRandomHeight(), 0);
-            vel.set(ofRandomf(), ofRandomf(), 0);
+            pos = {ofRandomWidth(), ofRandomHeight(), 0};
+            vel = {ofRandomf(), ofRandomf(), 0};
 		
             float val = ofRandom( 30, 100 );
             col.set( val, val, val, 120 );
@@ -34,7 +34,7 @@ class Ball{
         }
 	
         //----------------------------------------------------------------	
-        void update(const ofVec3f & accelerometerData) {
+        void update(const glm::vec3 & accelerometerData) {
             vel.x += ACCELEROMETER_FORCE * accelerometerData.x * ofRandomuf();
             vel.y += -ACCELEROMETER_FORCE * accelerometerData.y * ofRandomuf();        // this one is subtracted cos world Y is opposite to opengl Y
 		
@@ -72,7 +72,7 @@ class Ball{
 	
         //----------------------------------------------------------------	
         void moveTo(int x, int y) {
-            pos.set(x, y, 0);
-            vel.set(0, 0, 0);
+            pos = {x, y, 0};
+            vel = {0, 0, 0};
         }
 };
