@@ -24,8 +24,8 @@ class ofApp : public ofxiOSApp{
 	
         ofxiOSImagePicker camera;
         ofImage	photo;
-        ofPoint imgPos;
-        ofPoint prePoint;
+        glm::vec3 imgPos;
+        glm::vec3 prePoint;
 	
         ofImage camImg;
         ofImage libImg;
