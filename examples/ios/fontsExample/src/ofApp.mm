@@ -118,7 +118,7 @@ void ofApp::draw(){
 			ofRectangle bounds = verdana30.getStringBoundingBox(rotZ, 0, 0);
 			
 			ofTranslate(110 + bounds.width/2, 500 + bounds.height / 2, 0);
-			ofRotateZ(ofGetElapsedTimef() * -30.0);
+			ofRotateZDeg(ofGetElapsedTimef() * -30.0);
 					
 			verdana30.drawString(rotZ, -bounds.width/2, bounds.height/2 );
 		ofPopMatrix();
@@ -163,7 +163,7 @@ void ofApp::touchDown(ofTouchEventArgs & touch){
 //--------------------------------------------------------------
 void ofApp::touchMoved(ofTouchEventArgs & touch){
 	if( touch.id == 0 ){
-		ofPoint pt( touch.x, touch.y );
+		glm::vec2 pt( touch.x, touch.y );
 		drag += pt - touchPt;
 		
 		touchPt = pt;
