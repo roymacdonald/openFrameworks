@@ -31,7 +31,7 @@ class ofApp : public ofxiOSApp{
 		string xmlStructure;
 		string message;
 
-		ofPoint dragPts[NUM_PTS];
+		glm::vec3 dragPts[NUM_PTS];
 
 		int pointCount;
 		int lineCount;
