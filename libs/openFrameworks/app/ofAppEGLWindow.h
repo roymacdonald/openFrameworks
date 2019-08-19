@@ -66,7 +66,9 @@ public:
 	static bool doesLoop(){ return false; }
 	static bool allowsMultiWindow(){ return false; }
 	static bool needsPolling(){ return true; }
-	static void pollEvents();
+	static void pollEventsStatic();
+	virtual void pollEvents();
+	
 
 	using ofAppBaseGLESWindow::setup;
 	void setup(const ofAppEGLWindowSettings & settings);

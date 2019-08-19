@@ -150,9 +150,15 @@ void ofMainLoop::loopOnce(){
 }
 
 void ofMainLoop::pollEvents(){
-	if(windowPollEvents){
-		windowPollEvents();
+	auto w = windowsApps.begin();
+	if(w != windowsApps.end()){
+		if(w->first){
+			w->first->pollEvents();
+		}
 	}
+//	if(windowPollEvents){
+//		windowPollEvents();
+//	}
 }
 
 void ofMainLoop::exit(){

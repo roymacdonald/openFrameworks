@@ -20,9 +20,9 @@ public:
 		if(Window::doesLoop()){
 		    windowLoop = Window::loop;
 		}
-		if(Window::needsPolling()){
-			windowPollEvents = Window::pollEvents;
-		}
+//		if(Window::needsPolling()){
+//			windowPollEvents = Window::pollEvents;
+//		}
 		if(!allowMultiWindow){
 		    windowsApps.clear();
 		}

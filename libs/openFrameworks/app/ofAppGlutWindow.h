@@ -20,7 +20,7 @@ public:
 	static bool allowsMultiWindow(){ return false; }
 	static void loop();
 	static bool needsPolling(){ return false; }
-	static void pollEvents(){  }
+	virtual void pollEvents(){  }
 
 	using ofAppBaseWindow::setup;
 	void setup(const ofGLWindowSettings & settings);

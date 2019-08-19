@@ -69,7 +69,7 @@ public:
 	static bool doesLoop(){ return false; }
 	static bool allowsMultiWindow(){ return true; }
 	static bool needsPolling(){ return true; }
-	static void pollEvents();
+	virtual void pollEvents();
 
 
     // this functions are only meant to be called from inside OF don't call them from your code

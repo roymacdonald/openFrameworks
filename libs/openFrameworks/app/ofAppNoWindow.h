@@ -19,7 +19,7 @@ public:
 	static bool allowsMultiWindow(){ return false; }
 	static void loop(){};
 	static bool needsPolling(){ return false; }
-	static void pollEvents(){};
+	virtual void pollEvents(){};
 
 	void run(ofBaseApp * appPtr);
 

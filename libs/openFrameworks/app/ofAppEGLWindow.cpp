@@ -1014,9 +1014,12 @@ int ofAppEGLWindow::getWindowWidth() {
 int ofAppEGLWindow::getWindowHeight() {
 	return currentWindowRect.height;
 }
-
 //------------------------------------------------------------
 void ofAppEGLWindow::pollEvents(){
+	this->pollEventsStatic();
+}
+//------------------------------------------------------------
+void ofAppEGLWindow::pollEventsStatic(){
 	if(!instance) return;
 	if(instance->isUsingX11) {
 		while(1){

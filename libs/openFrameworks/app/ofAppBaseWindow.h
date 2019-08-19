@@ -28,6 +28,7 @@ public:
 	virtual void setup(const ofWindowSettings & settings)=0;
 	virtual void update()=0;
 	virtual void draw()=0;
+	virtual void pollEvents()=0;
 	virtual bool getWindowShouldClose(){
 		return false;
 	}
