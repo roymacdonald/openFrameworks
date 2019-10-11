@@ -74,6 +74,7 @@ createArchImg(){
         download=1
     elif [ -f ~/archlinux/timestamp ]; then
         if [ $(age ~/archlinux/timestamp) -gt 7 ]; then
+            rm -rf ~/archlinux
             download=1
         fi
     fi
@@ -92,7 +93,8 @@ createArchImg(){
 	        tar xzf ~/ArchLinuxARM-rpi-2-latest.tar.gz --no-same-owner -C ~/archlinux/ 2>&1 >/dev/null | grep -v "tar: Ignoring unknown extended header keyword"
             sed -i s_/etc/pacman_$HOME/archlinux/etc/pacman_g ~/archlinux/etc/pacman.conf
             sed -i "s/Required DatabaseOptional/Never/g" ~/archlinux/etc/pacman.conf
-            pacman --noconfirm -S ccache
+            pacman --noconfirm -Sy archlinux-keyring
+            pacman --noconfirm -Syu ccache
 			pacman --noconfirm -r ~/archlinux/ --config ~/archlinux/etc/pacman.conf --arch=armv7h -Syu
 			pacman --noconfirm -r ~/archlinux/ --config ~/archlinux/etc/pacman.conf --arch=armv7h -S \
 				make \
@@ -201,7 +203,11 @@ installJunest(){
 	fi
 	export PATH=~/.local/share/junest/bin:$PATH
 	junest -u << EOF
-		pacman -Syy --noconfirm
+        echo updating keys
+        pacman -S gnupg --noconfirm
+        pacman-key --populate archlinux
+        pacman-key --refresh-keys
+		pacman -Syyu --noconfirm
 		pacman -S --noconfirm git flex grep gcc pkg-config make wget
 EOF
     echo "Done installing junest"
