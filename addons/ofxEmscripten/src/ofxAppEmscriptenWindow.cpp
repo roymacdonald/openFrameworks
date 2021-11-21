@@ -40,183 +40,46 @@ static const char* eglErrorString(EGLint err) {
     return str.c_str();
 }
 
-ofxAppEmscriptenWindow::ofxAppEmscriptenWindow()
-:display(NULL)
-,context(NULL)
-,surface(NULL)
-,bEnableSetupScreen(true){
+ofxAppEmscriptenWindow::ofxAppEmscriptenWindow(){
 	instance = this;
-
 }
 
 ofxAppEmscriptenWindow::~ofxAppEmscriptenWindow() {
-	// TODO Auto-generated destructor stub
+	if(context != 0){
+		emscripten_webgl_destroy_context(context);	
+	}
 }
 
 void ofxAppEmscriptenWindow::setup(const ofGLESWindowSettings & settings){
-	EGLint numConfigs;
-	EGLint majorVersion;
-	EGLint minorVersion;
-	EGLConfig config;
-	EGLint contextAttribs[] = { EGL_CONTEXT_MAJOR_VERSION, 3, EGL_NONE, EGL_NONE };
-	std::vector <EGLint> attribList =
-	   {
-		   EGL_RED_SIZE, EGL_DONT_CARE,
-		   EGL_GREEN_SIZE, EGL_DONT_CARE,
-		   EGL_BLUE_SIZE, EGL_DONT_CARE,
-		   EGL_ALPHA_SIZE, EGL_DONT_CARE,
-		   EGL_DEPTH_SIZE, EGL_DONT_CARE,
-		   EGL_STENCIL_SIZE, EGL_DONT_CARE,
-		   EGL_SAMPLE_BUFFERS, EGL_DONT_CARE,
-		   EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT_KHR,
-		   EGL_NONE
-	   };
-	   
-    // We'll try these alpha sizes in order ending with EGL_DONT_CARE if we don't get anything higher.
-    std::vector <EGLint> alphaPreference = {8, EGL_DONT_CARE};
-    
-    // Find the index for the value EGL_ALPHA_SIZE uses, so we can try a few different values till we get a successful config.
-    int attribListAlphaIndex = -1;
-    for(int i = 0; i < attribList.size(); i++){
-        if( attribList[i] == EGL_ALPHA_SIZE ){
-            attribListAlphaIndex = i+1;
-            break;
-        }
-    }
 
-    // We'll try these depth sizes in order ending with EGL_DONT_CARE if we don't get anything higher.
-    std::vector <EGLint> depthPreference = {24, 16, EGL_DONT_CARE};
-    
-    // Find the index for the value EGL_DEPTH_SIZE uses, so we can try a few different values till we get a successful config.
-    int attribListDepthIndex = -1;
-    for(int i = 0; i < attribList.size(); i++){
-        if( attribList[i] == EGL_DEPTH_SIZE ){
-            attribListDepthIndex = i+1;
-            break;
-        }
-    }
+	EmscriptenWebGLContextAttributes attrs;
+	emscripten_webgl_init_context_attributes(&attrs);
 
-    // We'll try these sample buffers in order ending with EGL_DONT_CARE if we don't get anything higher.
-    std::vector <EGLint> sampleBuffersPreference = {1, EGL_DONT_CARE};
-    
-    // Find the index for the value EGL_SAMPLE_BUFFERS uses, so we can try a few different values till we get a successful config.
-    int attribListSampleBuffersIndex = -1;
-    for(int i = 0; i < attribList.size(); i++){
-        if( attribList[i] == EGL_SAMPLE_BUFFERS ){
-            attribListSampleBuffersIndex = i+1;
-            break;
-        }
-    }
 
-	// Get Display
-	display = eglGetDisplay((EGLNativeDisplayType)EGL_DEFAULT_DISPLAY);
-	if ( display == EGL_NO_DISPLAY ){
-		ofLogError() << "coudln't get display";
-		return;
-	}
+/// when setting  explicitSwapControl to 0 it is emscripten that is in charge of swapping on each render call.
 
-	// Initialize EGL
-	if ( !eglInitialize(display, &majorVersion, &minorVersion) ){
-		ofLogError() << "couldn't initialize display";
-		return;
-	}
+	attrs.explicitSwapControl = 0;
+    attrs.depth = 1;
+    attrs.stencil = 1;
+    attrs.antialias = 1;
+    attrs.majorVersion = 2;
+    attrs.minorVersion = 0;
+	attrs.alpha = 1;
 
-	// Get configs
-	if ( !eglGetConfigs(display, NULL, 0, &numConfigs) ){
-		ofLogError() << "couldn't get configs";
-		return;
-	}
-    
-    // Choose the config based on our attribute list
-    // Try higher EGL_ALPHA_SIZE first
-    for(int i = 0; i < alphaPreference.size(); i++){
-        // Set EGL_ALPHA_SIZE
-        attribList[attribListAlphaIndex] = alphaPreference[i];
-        
-        // Try out that depth value
-        if ( !eglChooseConfig(display, &attribList[0], &config, 1, &numConfigs) ){
-
-            // Finally fail like we did before if no preference works 
-            if( alphaPreference[i] == EGL_DONT_CARE ){
-                ofLogError() << "couldn't choose display";
-                return;
-            }
-
-        }else{
-            // Got a good configuration. Stop searching. 
-            break;
-        }
-    }
-    
-    // Choose the config based on our attribute list
-    // Try higher EGL_DEPTH_SIZE first
-    for(int i = 0; i < depthPreference.size(); i++){
-        // Set EGL_DEPTH_SIZE
-        attribList[attribListDepthIndex] = depthPreference[i];
-        
-        // Try out that depth value
-        if ( !eglChooseConfig(display, &attribList[0], &config, 1, &numConfigs) ){
-
-            // Finally fail like we did before if no preference works 
-            if( depthPreference[i] == EGL_DONT_CARE ){
-                ofLogError() << "couldn't choose display";
-                return;
-            }
-
-        }else{
-            // Got a good configuration. Stop searching. 
-            break;
-        }
-    }
-    
-    // Choose the config based on our attribute list
-    // Try higher EGL_SAMPLE_BUFFERS first
-    for(int i = 0; i < sampleBuffersPreference.size(); i++){
-        // Set EGL_SAMPLE_BUFFERS
-        attribList[attribListSampleBuffersIndex] = sampleBuffersPreference[i];
-        
-        // Try out that depth value
-        if ( !eglChooseConfig(display, &attribList[0], &config, 1, &numConfigs) ){
-
-            // Finally fail like we did before if no preference works 
-            if( sampleBuffersPreference[i] == EGL_DONT_CARE ){
-                ofLogError() << "couldn't choose display";
-                return;
-            }
-
-        }else{
-            // Got a good configuration. Stop searching. 
-            break;
-        }
-    }
-
-	// Create a surface
-	surface = eglCreateWindowSurface(display, config, NULL, NULL);
-	if ( surface == EGL_NO_SURFACE ){
-		ofLogError() << "couldn't create surface";
-		return;
-	}
-
-	// Create a GL context
-	context = eglCreateContext(display, config, EGL_NO_CONTEXT, contextAttribs );
-	if ( context == EGL_NO_CONTEXT ){
-		ofLogError() << "couldn't create context";
-	    return;
-	}
-
-	// Make the context current
-	if ( !eglMakeCurrent(display, surface, surface, context) ){
-		ofLogError() << "couldn't make current display";
-		return;
-	}
+	context = emscripten_webgl_create_context("#canvas", &attrs);
+	assert(context);
+	  
+	makeCurrent();
 
 	setWindowShape(settings.getWidth(),settings.getHeight());
 
 	_renderer = make_shared<ofGLProgrammableRenderer>(this);
 	((ofGLProgrammableRenderer*)_renderer.get())->setup(2,0);
 
-    emscripten_set_keydown_callback("#canvas",this,1,&keydown_cb);
-    emscripten_set_keyup_callback("#canvas",this,1,&keyup_cb);
+	//for some reason the key events were not working on Macos when using #canvas
+    emscripten_set_keydown_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW,this,1,&keydown_cb);
+    emscripten_set_keyup_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW,this,1,&keyup_cb);
+    
     emscripten_set_mousedown_callback("#canvas",this,1,&mousedown_cb);
     emscripten_set_mouseup_callback("#canvas",this,1,&mouseup_cb);
     emscripten_set_mousemove_callback("#canvas",this,1,&mousemoved_cb);
@@ -225,6 +88,7 @@ void ofxAppEmscriptenWindow::setup(const ofGLESWindowSettings & settings){
     emscripten_set_touchend_callback("#canvas",this,1,&touch_cb);
     emscripten_set_touchmove_callback("#canvas",this,1,&touch_cb);
     emscripten_set_touchcancel_callback("#canvas",this,1,&touch_cb);
+
 }
 
 void ofxAppEmscriptenWindow::loop(){
@@ -241,7 +105,6 @@ void ofxAppEmscriptenWindow::update(){
 }
 
 void ofxAppEmscriptenWindow::draw(){
-	///////////////////////////////////////////////////////////////////////////////////////
 	// set viewport, clear the screen
 	renderer()->startRender();
 	if( bEnableSetupScreen ) renderer()->setupScreen();
@@ -249,13 +112,6 @@ void ofxAppEmscriptenWindow::draw(){
 	events().notifyDraw();
 
 	renderer()->finishRender();
-
-
-	EGLBoolean success = eglSwapBuffers( display, surface );
-	if( !success ) {
-		EGLint error = eglGetError();
-		ofLogNotice("of::emscripten::EGLPage") << "display(): eglSwapBuffers failed: " << eglErrorString(error);
-	}
 }
 
 void ofxAppEmscriptenWindow::display_cb(){
@@ -339,15 +195,6 @@ void ofxAppEmscriptenWindow::hideCursor(){
 	emscripten_hide_mouse();
 }
 
-
-void ofxAppEmscriptenWindow::showCursor(){
-
-}
-
-void ofxAppEmscriptenWindow::setWindowPosition(int x, int y){
-
-}
-
 void ofxAppEmscriptenWindow::setWindowShape(int w, int h){
     emscripten_set_canvas_size(w,h);
 }
@@ -359,17 +206,13 @@ glm::vec2 ofxAppEmscriptenWindow::getWindowPosition(){
 glm::vec2 ofxAppEmscriptenWindow::getWindowSize(){
 	int width;
 	int height;
-	int isFullscreen;
-    emscripten_get_canvas_size(&width, &height, &isFullscreen);
-	return glm::vec3(width,height,isFullscreen);
+
+	emscripten_get_canvas_element_size("#canvas", &width, &height);
+	return glm::vec2(width,height);
 }
 
 glm::vec2 ofxAppEmscriptenWindow::getScreenSize(){
 	return getWindowSize();
-}
-
-void ofxAppEmscriptenWindow::setOrientation(ofOrientation orientation){
-
 }
 
 ofOrientation ofxAppEmscriptenWindow::getOrientation(){
@@ -387,10 +230,6 @@ int	ofxAppEmscriptenWindow::getWidth(){
 
 int	ofxAppEmscriptenWindow::getHeight(){
 	return getWindowSize().y;
-}
-
-void ofxAppEmscriptenWindow::setWindowTitle(string title){
-
 }
 
 ofWindowMode ofxAppEmscriptenWindow::getWindowMode(){
@@ -424,21 +263,8 @@ void ofxAppEmscriptenWindow::disableSetupScreen(){
 	bEnableSetupScreen = false;
 }
 
-void ofxAppEmscriptenWindow::setVerticalSync(bool enabled){
-	eglSwapInterval(display, enabled ? 1 : 0);
-}
-
-EGLDisplay ofxAppEmscriptenWindow::getEGLDisplay(){
-	return display;
-}
-
-
 EGLContext ofxAppEmscriptenWindow::getEGLContext(){
-	return context;
-}
-
-EGLSurface ofxAppEmscriptenWindow::getEGLSurface(){
-	return surface;
+	return &context;
 }
 
 ofCoreEvents & ofxAppEmscriptenWindow::events(){
@@ -447,4 +273,18 @@ ofCoreEvents & ofxAppEmscriptenWindow::events(){
 
 shared_ptr<ofBaseRenderer> & ofxAppEmscriptenWindow::renderer(){
 	return _renderer;
+}
+
+void ofxAppEmscriptenWindow::makeCurrent(){
+	if(context != 0){
+		emscripten_webgl_make_context_current(context);	
+	}
+}
+
+void ofxAppEmscriptenWindow::startRender(){
+	renderer()->startRender();
+}
+
+void ofxAppEmscriptenWindow::finishRender(){
+	renderer()->finishRender();
 }
