@@ -35,6 +35,7 @@ else
 	ARFLAGS = -cr
 endif
 
+
 ################################################################################
 # CFLAGS
 ################################################################################
@@ -256,17 +257,19 @@ ifeq ($(SHAREDCORE),1)
 $(TARGET) : $(OF_CORE_OBJ_FILES) $(OF_CORE_OBJ_OUTPUT_PATH).compiler_flags
 	@echo "Creating library " $(TARGET)
 	@mkdir -p $(@D)
-	$(CC) -shared $(OF_CORE_OBJ_FILES) -o $@
+	$(CC) -s ERROR_ON_UNDEFINED_SYMBOLS=0 -shared $(OF_CORE_OBJ_FILES) -o $@
 else ifeq ($(BYTECODECORE),1)
 $(TARGET) : $(OF_CORE_OBJ_FILES) $(OF_CORE_OBJ_OUTPUT_PATH).compiler_flags
 	@echo "Creating library " $(TARGET)
 	@mkdir -p $(@D)
-	$(CC) $(OF_CORE_OBJ_FILES) -o $@
+	emar rcs  $@ $(OF_CORE_OBJ_FILES)
+
+# 	$(CC) -s ERROR_ON_UNDEFINED_SYMBOLS=0 $(OF_CORE_OBJ_FILES) -o $@
 else
 $(TARGET) : $(OF_CORE_OBJ_FILES) $(OF_CORE_OBJ_OUTPUT_PATH).compiler_flags
 	@echo "Creating library " $(TARGET)
 	@mkdir -p $(@D)
-	$(AR) ${ARFLAGS} "$@" $(OF_CORE_OBJ_FILES)
+	$(AR) -s ERROR_ON_UNDEFINED_SYMBOLS=0 ${ARFLAGS} "$@" $(OF_CORE_OBJ_FILES)
 endif
 -include $(OF_CORE_DEPENDENCY_FILES)
 

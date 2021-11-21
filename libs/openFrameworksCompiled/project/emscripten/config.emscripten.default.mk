@@ -17,8 +17,8 @@
 PLATFORM_PROJECT_RELEASE_TARGET = bin/$(BIN_NAME).html
 PLATFORM_PROJECT_DEBUG_TARGET = bin/$(BIN_NAME).html
 BYTECODECORE=1
-PLATFORM_CORELIB_DEBUG_TARGET = $(OF_CORE_LIB_PATH)/libopenFrameworksDebug.bc
-PLATFORM_CORELIB_RELEASE_TARGET = $(OF_CORE_LIB_PATH)/libopenFrameworks.bc
+PLATFORM_CORELIB_DEBUG_TARGET = $(OF_CORE_LIB_PATH)/libopenFrameworksDebug.a
+PLATFORM_CORELIB_RELEASE_TARGET = $(OF_CORE_LIB_PATH)/libopenFrameworks.a
 
 ################################################################################
 # PLATFORM DEFINES
@@ -64,7 +64,7 @@ PLATFORM_REQUIRED_ADDONS = ofxEmscripten
 ################################################################################
 
 # Code Generation Option Flags (http://gcc.gnu.org/onlinedocs/gcc/Code-Gen-Options.html)
-PLATFORM_CFLAGS = -Wall -std=c++14 -Wno-warn-absolute-paths
+PLATFORM_CFLAGS = -Wall -std=c++17 -Wno-warn-absolute-paths -s ASSERTIONS=1
 
 
 ################################################################################
@@ -90,7 +90,11 @@ ifdef USE_CCACHE
 	endif
 endif
 
-PLATFORM_LDFLAGS = -Wl --gc-sections --preload-file bin/data@data --emrun -s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=0
+PLATFORM_LDFLAGS = -Wl,--gc-sections --preload-file bin/data@data --emrun -s DYNCALLS=1 -s USE_WEBGL2=1 -s MIN_WEBGL_VERSION=2 -s MAX_WEBGL_VERSION=2 -s BINARYEN_EXTRA_PASSES=--one-caller-inline-max-function-size=1 -s LLD_REPORT_UNDEFINED -s ASSERTIONS=1
+# -s ERROR_ON_UNDEFINED_SYMBOLS=0
+# -s WEBGL2_BACKWARDS_COMPATIBILITY_EMULATION=1
+
+# PLATFORM_LDFLAGS = -Wl --gc-sections --preload-file bin/data@data --emrun -s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=0 
 PLATFORM_LDFLAGS += --js-library $(OF_ADDONS_PATH)/ofxEmscripten/libs/html5video/lib/emscripten/library_html5video.js
 PLATFORM_LDFLAGS += --js-library $(OF_ADDONS_PATH)/ofxEmscripten/libs/html5audio/lib/emscripten/library_html5audio.js
 
@@ -102,7 +106,7 @@ endif
 
 PLATFORM_OPTIMIZATION_LDFLAGS_RELEASE = -O3 -s TOTAL_MEMORY=$(PLATFORM_EMSCRIPTEN_TOTAL_MEMORY) --memory-init-file 1
 
-PLATFORM_OPTIMIZATION_LDFLAGS_DEBUG = -g3 -s TOTAL_MEMORY=134217728 --memory-init-file 1  -s DEMANGLE_SUPPORT=1 -s ASSERTIONS=2
+PLATFORM_OPTIMIZATION_LDFLAGS_DEBUG = -g3 -s TOTAL_MEMORY=134217728 --memory-init-file 1  -s DEMANGLE_SUPPORT=1 -s ASSERTIONS=2 
 
 ################################################################################
 # PLATFORM OPTIMIZATION CFLAGS
@@ -282,3 +286,4 @@ afterplatform: $(TARGET_NAME)
 	@echo "     "
 	@emrun --list_browsers 2>/dev/null
 	@echo
+	@emrun --browser firefox bin/$(BIN_NAME).html
