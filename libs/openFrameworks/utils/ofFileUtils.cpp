@@ -13,6 +13,8 @@
 	#include <limits.h>        /* PATH_MAX */
 #endif
 
+#include <unistd.h>
+
 using namespace std;
 
 

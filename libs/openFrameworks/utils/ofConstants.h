@@ -17,7 +17,7 @@
 
 // Set to 1 to use std filesystem instead of boost's
 #ifndef OF_USING_STD_FS
-#define OF_USING_STD_FS 0
+#define OF_USING_STD_FS 1
 #endif
 
 //-------------------------------
