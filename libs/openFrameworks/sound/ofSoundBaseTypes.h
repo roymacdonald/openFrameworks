@@ -155,6 +155,8 @@ public:
 	virtual void close() = 0;
 
 	virtual uint64_t getTickCount() const = 0;
+    virtual uint64_t getInTicks() const = 0;
+    virtual uint64_t getOutTicks() const = 0;
 	virtual int getNumInputChannels() const = 0;
 	virtual int getNumOutputChannels() const = 0;
 	virtual int getSampleRate() const = 0;

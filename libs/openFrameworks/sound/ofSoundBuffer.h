@@ -217,6 +217,8 @@ public:
 	/// return the underlying buffer. careful!
 	std::vector<float> & getBuffer();
 	const std::vector<float> & getBuffer() const;
+    
+    bool isSilent();
 
 protected:
 

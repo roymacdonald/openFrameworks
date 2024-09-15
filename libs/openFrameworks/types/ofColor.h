@@ -546,7 +546,7 @@ public:
     /// \param is An input stream reference.
     /// \param color The color to fill with the input stream.
     /// \returns The passed input stream reference, useful for method chaining.
-	friend std::istream& operator >> (std::istream& is, ofColor_<PixelType>& color) {
+ 	friend std::istream& operator >> (std::istream& is, ofColor_<PixelType>& color) {
 		if(sizeof(PixelType) == 1) {
 			int component;
 			is >> std::skipws >> component;

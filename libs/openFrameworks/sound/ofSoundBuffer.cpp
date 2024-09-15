@@ -623,3 +623,12 @@ namespace std{
 	}
 }
 
+bool ofSoundBuffer::isSilent(){
+    
+    for(const auto& s: buffer ){
+        if(!ofIsFloatEqual(s, 0.0f)){
+            return false;
+        }
+    }
+    return true;
+}

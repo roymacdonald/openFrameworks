@@ -300,13 +300,13 @@ void ofEasyCam::updateTranslation(){
 			glm::vec3 mousePre ;
 			bool bDoScale = (currentTransformType == TRANSFORM_SCALE || currentTransformType == TRANSFORM_TRANSLATE_Z);
 			if (bDoScale) {
-				mousePre = screenToWorld(glm::vec3((bIsScrolling?mouseAtScroll:lastPressMouse),0));
+				mousePre = screenToWorld(glm::vec3((bIsScrolling?mouseAtScroll:lastPressMouse),0), getControlArea());
 			}
 			move(glm::vec3(lastPressAxisX * translate.x) + (lastPressAxisY * translate.y));
 			if (bDoScale) {
 				setScale(getScale() + translate.z);
 				// this move call is to keep the scaling centered below the mouse.
-				move(mousePre - screenToWorld(glm::vec3((bIsScrolling?mouseAtScroll:lastPressMouse),0)));
+				move(mousePre - screenToWorld(glm::vec3((bIsScrolling?mouseAtScroll:lastPressMouse),0), getControlArea() ));
 			}
 		}else{
 			move(glm::vec3(lastPressAxisX * translate.x) + (lastPressAxisY * translate.y) + (lastPressAxisZ * translate.z));

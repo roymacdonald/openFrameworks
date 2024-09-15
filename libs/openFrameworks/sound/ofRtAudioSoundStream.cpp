@@ -63,6 +63,8 @@ ofSoundDevice::Api toOf(RtAudio::Api api){
 //------------------------------------------------------------------------------
 ofRtAudioSoundStream::ofRtAudioSoundStream() {
 	tickCount = 0;
+    inTicks = 0;
+    outTicks =0;
 }
 
 //------------------------------------------------------------------------------
@@ -74,39 +76,105 @@ ofRtAudioSoundStream::~ofRtAudioSoundStream() {
 //------------------------------------------------------------------------------
 std::vector<ofSoundDevice> ofRtAudioSoundStream::getDeviceList(ofSoundDevice::Api api) const{
 	vector<ofSoundDevice> deviceList;
-	try {
-		auto rtAudioApi = toRtAudio(api);
-		RtAudio audioTemp(toRtAudio(api));
-		audioTemp.showWarnings(false);
-		if(audioTemp.getCurrentApi()!=rtAudioApi && rtAudioApi!=RtAudio::Api::UNSPECIFIED){
-			return deviceList;
-		}
-		auto deviceCount = audioTemp.getDeviceCount();
-		RtAudio::DeviceInfo info;
-		for (unsigned int i = 0; i < deviceCount; i++) {
-			try {
-				info = audioTemp.getDeviceInfo(i);
-			}
-			catch (std::exception &error) {
-				ofLogError("ofRtAudioSoundStream") << "Error retrieving info for device " << i;
-				ofLogError() << error.what();
-				break;
-			}
+//	try {
+        auto rtAudioApi = toRtAudio(api);
+        RtAudio audioTemp(toRtAudio(api));
+        audioTemp.showWarnings(false);
+        
+        if(audioTemp.getCurrentApi()!=rtAudioApi && rtAudioApi!=RtAudio::Api::UNSPECIFIED){
+            std::cout << "wrong RT audio API\n";
+            return deviceList;
+        }
+        
+        
+        std::cout << "\nAPI: " << RtAudio::getApiDisplayName(audioTemp.getCurrentApi()) << std::endl;
 
-			ofSoundDevice dev;
-			dev.deviceID = i;
-			dev.name = info.name;
-			dev.outputChannels = info.outputChannels;
-			dev.inputChannels = info.inputChannels;
-			dev.sampleRates = info.sampleRates;
-			dev.isDefaultInput = info.isDefaultInput;
-			dev.isDefaultOutput = info.isDefaultOutput;
-			dev.api = api;
-			deviceList.push_back(dev);
-		}
-	}catch (std::exception &error) {
-		ofLogError() << error.what();
-	}
+        std::vector<unsigned int> devices = audioTemp.getDeviceIds();
+        // std::cout << "\nFound " << devices.size() << " device(s) ...\n";
+             RtAudio::DeviceInfo info;
+        for (unsigned int i=0; i<devices.size(); i++) {
+            info = audioTemp.getDeviceInfo( devices[i] );
+            
+            std::cout << "\nDevice Name = " << info.name << '\n';
+            std::cout << "Device Index = " << i << '\n';
+            std::cout << "Output Channels = " << info.outputChannels << '\n';
+            std::cout << "Input Channels = " << info.inputChannels << '\n';
+            std::cout << "Duplex Channels = " << info.duplexChannels << '\n';
+            if ( info.isDefaultOutput ) std::cout << "This is the default output device.\n";
+            else std::cout << "This is NOT the default output device.\n";
+            if ( info.isDefaultInput ) std::cout << "This is the default input device.\n";
+            else std::cout << "This is NOT the default input device.\n";
+            if ( info.nativeFormats == 0 ){
+                std::cout << "No natively supported data formats(?)!";
+            }else {
+                std::cout << "Natively supported data formats:\n";
+                if ( info.nativeFormats & RTAUDIO_SINT8 )
+                    std::cout << "  8-bit int\n";
+                if ( info.nativeFormats & RTAUDIO_SINT16 )
+                    std::cout << "  16-bit int\n";
+                if ( info.nativeFormats & RTAUDIO_SINT24 )
+                    std::cout << "  24-bit int\n";
+                if ( info.nativeFormats & RTAUDIO_SINT32 )
+                    std::cout << "  32-bit int\n";
+                if ( info.nativeFormats & RTAUDIO_FLOAT32 )
+                    std::cout << "  32-bit float\n";
+                if ( info.nativeFormats & RTAUDIO_FLOAT64 )
+                    std::cout << "  64-bit float\n";
+            }
+            if ( info.sampleRates.size() < 1 ){
+                std::cout << "No supported sample rates found!";
+            }else {
+                std::cout << "Supported sample rates = ";
+                for (unsigned int j=0; j<info.sampleRates.size(); j++){
+                    std::cout << info.sampleRates[j] << " ";
+                }
+            }
+            std::cout << std::endl;
+            if ( info.preferredSampleRate == 0 ){
+                std::cout << "No preferred sample rate found!" << std::endl;
+            }else{
+                std::cout << "Preferred sample rate = " << info.preferredSampleRate << std::endl;
+                
+                ofSoundDevice dev;
+                dev.deviceID = devices[i];
+                dev.name = info.name;
+                dev.outputChannels = info.outputChannels;
+                dev.inputChannels = info.inputChannels;
+                dev.sampleRates = info.sampleRates;
+                dev.isDefaultInput = info.isDefaultInput;
+                dev.isDefaultOutput = info.isDefaultOutput;
+                dev.api = api;
+                deviceList.push_back(dev);
+            }
+        }
+        
+	
+	// 	auto deviceCount = audioTemp.getDeviceCount();
+	// 	RtAudio::DeviceInfo info;
+	// 	for (unsigned int i = 0; i < deviceCount; i++) {
+	// 		try {
+	// 			info = audioTemp.getDeviceInfo(i);
+	// 		}
+	// 		catch (std::exception &error) {
+	// 			ofLogError("ofRtAudioSoundStream") << "Error retrieving info for device " << i;
+	// 			ofLogError() << error.what();
+	// 			break;
+	// 		}
+
+	// 		ofSoundDevice dev;
+	// 		dev.deviceID = i;
+	// 		dev.name = info.name;
+	// 		dev.outputChannels = info.outputChannels;
+	// 		dev.inputChannels = info.inputChannels;
+	// 		dev.sampleRates = info.sampleRates;
+	// 		dev.isDefaultInput = info.isDefaultInput;
+	// 		dev.isDefaultOutput = info.isDefaultOutput;
+	// 		dev.api = api;
+	// 		deviceList.push_back(dev);
+	// 	}
+	// }catch (std::exception &error) {
+	// 	ofLogError() << error.what();
+	// }
 
 	return deviceList;
 
@@ -291,7 +359,13 @@ int ofRtAudioSoundStream::rtAudioCallback(void *outputBuffer, void *inputBuffer,
 		if (rtStreamPtr->settings.inCallback) {
 			rtStreamPtr->inputBuffer.copyFrom(fPtrIn, nFramesPerBuffer, nInputChannels, rtStreamPtr->getSampleRate());
 			rtStreamPtr->inputBuffer.setTickCount(rtStreamPtr->tickCount);
+            if(rtStreamPtr->inputBuffer.isSilent()){
+                rtStreamPtr->increaseInTicks();
+            }
 			rtStreamPtr->settings.inCallback(rtStreamPtr->inputBuffer);
+            
+            
+            
 		}
 		// [damian] not sure what this is for? assuming it's for underruns? or for when the sound system becomes broken?
 		memset(fPtrIn, 0, nFramesPerBuffer * nInputChannels * sizeof(float));
@@ -306,6 +380,11 @@ int ofRtAudioSoundStream::rtAudioCallback(void *outputBuffer, void *inputBuffer,
 			}
 			rtStreamPtr->outputBuffer.setTickCount(rtStreamPtr->tickCount);
 			rtStreamPtr->settings.outCallback(rtStreamPtr->outputBuffer);
+//            rtStreamPtr->increaseOutTicks();
+            if(rtStreamPtr->outputBuffer.isSilent()){
+                rtStreamPtr->increaseOutTicks();
+            }
+            
 		}
 		rtStreamPtr->outputBuffer.copyTo(fPtrOut, nFramesPerBuffer, nOutputChannels, 0);
 		rtStreamPtr->outputBuffer.set(0);
@@ -316,3 +395,6 @@ int ofRtAudioSoundStream::rtAudioCallback(void *outputBuffer, void *inputBuffer,
 
 	return 0;
 }
+
+uint64_t ofRtAudioSoundStream::getInTicks() const {return inTicks.load();}
+uint64_t  ofRtAudioSoundStream::getOutTicks() const {return outTicks.load();}

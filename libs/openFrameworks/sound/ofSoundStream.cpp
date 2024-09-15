@@ -337,7 +337,20 @@ uint64_t ofSoundStream::getTickCount() const{
 	}
 	return 0;
 }
-
+//------------------------------------------------------------
+uint64_t ofSoundStream::getInTicks() const{
+    if( soundStream ){
+        return soundStream->getInTicks();
+    }
+    return 0;
+}
+//------------------------------------------------------------
+uint64_t ofSoundStream::getOutTicks() const{
+    if( soundStream ){
+        return soundStream->getOutTicks();
+    }
+    return 0;
+}
 //------------------------------------------------------------
 int ofSoundStream::getNumInputChannels() const{
 	if( soundStream ){

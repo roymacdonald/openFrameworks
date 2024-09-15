@@ -160,7 +160,8 @@ public:
 	///
 	/// \return number of buffers passed through the stream since it started.
 	uint64_t getTickCount() const;
-
+    uint64_t getInTicks() const;
+    uint64_t getOutTicks() const;
 	/// \brief Queries the stream's number of input channels.
 	/// \return the number of input channels (e.g. 2 for stereo).
 	int getNumInputChannels() const;
